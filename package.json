@@ -1,6 +1,6 @@
 {
   "name": "draft-js-raw-content-state",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Helps you build draft-js raw content states for initializing your editor or for testing",
   "main": "index.js",
   "scripts": {
