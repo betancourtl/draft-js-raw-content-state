@@ -147,7 +147,7 @@ RawContentState.prototype.setDepth = function (depth) {
 // do not test
 RawContentState.prototype.log = function () {
   console.log(JSON.stringify(this.selection, null, 2));
-  console.log(JSON.stringify(this.raw, null, 2));
+  console.log(JSON.stringify(this, null, 2));
 
   return this;
 };

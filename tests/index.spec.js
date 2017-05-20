@@ -177,8 +177,8 @@ describe('addEntity', () => {
   it('should create default entity if with defined offset, and length', () => {
     const contentState = new Raw()
       .addBlock('block 1').addEntity({}, 2, 4)
-      .addBlock('block 2')
-      .addBlock('block 3');
+      .addBlock('block 3')
+      .log();
     expect(contentState.entityMap).to.deep.equal({
       0: {
         type: 'DEFAULT_TYPE',
