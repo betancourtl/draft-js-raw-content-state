@@ -1,7 +1,4 @@
 # draft-js-raw-content-state
-# README Boilerplate
-
-A template of README best practices to make your README simple to understand and easy to use. 
 
 ## Table of Contents
 
@@ -55,51 +52,16 @@ Converts the raw contentState into an EditorState type object.
 ### Example
 
 ```javascript
-const contentState = new Raw()
-  .addBlock('block 1').addEntity({}, 2, 4)
-  .addBlock('block 3')
-  .log()
-//.toEditorState(); // to convert to an EditorState 
-```
-outputs
-```javascript
-{
-  "selection": {},
-  "entityMap": {
-    "0": {
-      "data": {},
-      "type": "DEFAULT_TYPE",
-      "mutability": "MUTABLE"
-    }
-  },
-  "blocks": [
-    {
-      "key": "9rnhh",
-      "text": "block 1",
-      "type": "unstyled",
-      "depth": 0,
-      "inlineStyleRanges": [],
-      "entityRanges": [
-        {
-          "key": 0,
-          "offset": 2,
-          "length": 4
-        }
-      ],
-      "data": {}
-    },
-    {
-      "key": "6j027",
-      "text": "block 3",
-      "type": "unstyled",
-      "depth": 0,
-      "inlineStyleRanges": [],
-      "entityRanges": [],
-      "data": {}
-    }
-  ]
-}
+const newEntity = {
+  type: 'CUSTOM_COLOR',
+  mutability: 'MUTABLE',
+  data: { color: 'red' }
+};
 
+const contentState = new Raw()
+  .addBlock('block 1').addEntity(newEntity, 2, 4)
+  .addBlock('block 3')
+  .toEditorState(); // to convert to an EditorState 
 ```
 
 ## Support
