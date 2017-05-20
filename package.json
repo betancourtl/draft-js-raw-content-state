@@ -1,0 +1,53 @@
+{
+  "name": "draft-js-raw-content-state",
+  "version": "1.0.0",
+  "description": "Helps you build draft-js raw content states for initializing your editor or for testing",
+  "main": "index.js",
+  "scripts": {
+    "dev": "watch 'npm run build' src",
+    "build": "babel src -d build",
+    "test": "mocha --compilers js:babel-core/register --recursive ./tests/*.spec.js",
+    "test:watch": "npm run test -- --watch",
+    "prepublish": "npm run build",
+    "release": "np"
+  },
+  "babel": {
+    "presets": [
+      "stage-0",
+      "es2015"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webdeveloperpr/draft-js-raw-content-state.git"
+  },
+  "keywords": [
+    "draft-js",
+    "contentState",
+    "react",
+    "editing",
+    "testing",
+    "editor"
+  ],
+  "author": "Luis Betancourt <webdeveloperpr@gmail.com> (https://github.com/webdeveloperpr)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/webdeveloperpr/draft-js-raw-content-state/issues"
+  },
+  "homepage": "https://github.com/webdeveloperpr/draft-js-raw-content-state#readme",
+  "dependencies": {
+    "draft-js": "0.10.1"
+  },
+  "devDependencies": {
+    "babel-cli": "6.24.1",
+    "babel-core": "6.24.1",
+    "babel-preset-es2015": "6.24.1",
+    "babel-preset-stage-0": "6.24.1",
+    "chai": "3.5.0",
+    "mocha": "3.4.1",
+    "np": "2.15.0",
+    "react": "15.5.4",
+    "react-dom": "15.5.4",
+    "watch": "1.0.2"
+  }
+}
