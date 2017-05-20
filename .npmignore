@@ -134,3 +134,4 @@ src/
 tests/
 .gitignore
 package.json
+.idea/

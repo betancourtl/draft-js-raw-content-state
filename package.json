@@ -2,7 +2,7 @@
   "name": "draft-js-raw-content-state",
   "version": "1.0.2",
   "description": "Helps you build draft-js raw content states for initializing your editor or for testing",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
     "dev": "watch 'npm run build' src",
     "build": "babel src -d build",
