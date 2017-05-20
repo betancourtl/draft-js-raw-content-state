@@ -1,5 +1,5 @@
 # draft-js-raw-content-state
-
+[![Build Status](https://travis-ci.org/webdeveloperpr/draft-js-raw-content-state.svg?branch=master)](https://travis-ci.org/webdeveloperpr/draft-js-raw-content-state)
 ## Table of Contents
 
 - [Installation](#installation)
