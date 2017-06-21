@@ -170,8 +170,8 @@ RawContentState.prototype.toContentState = function () {
  * @returns {EditorState}
  */
 // tested
-RawContentState.prototype.toEditorState = function () {
-  var editorState = _draftJs.EditorState.createWithContent(this.toContentState({ entityMap: this.entityMap, blocks: this.blocks }));
+RawContentState.prototype.toEditorState = function (decorator) {
+  var editorState = _draftJs.EditorState.createWithContent(this.toContentState({ entityMap: this.entityMap, blocks: this.blocks }), decorator);
   var selection = editorState.getSelection().merge(this.selection);
 
   return _draftJs.EditorState.acceptSelection(editorState, selection);
