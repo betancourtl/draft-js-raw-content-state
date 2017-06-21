@@ -148,9 +148,11 @@ RawContentState.prototype.toContentState = function () {
  * @returns {EditorState}
  */
 // tested
-RawContentState.prototype.toEditorState = function () {
+RawContentState.prototype.toEditorState = function (decorator) {
   const editorState = EditorState.createWithContent(
-    this.toContentState({ entityMap: this.entityMap, blocks: this.blocks }));
+    this.toContentState({ entityMap: this.entityMap, blocks: this.blocks }),
+    decorator
+  );
   const selection = editorState.getSelection().merge(this.selection);
 
   return EditorState.acceptSelection(editorState, selection);
