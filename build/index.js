@@ -27,6 +27,7 @@ var RawContentState = exports.RawContentState = function RawContentState(rawCont
   }
 };
 
+// Content Block
 RawContentState.prototype.addBlock = function () {
   var text = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
   var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'unstyled';
@@ -44,6 +45,32 @@ RawContentState.prototype.addBlock = function () {
 
   this.blocks.push(block);
 
+  return this;
+};
+
+RawContentState.prototype.setKey = function (key) {
+  var blockLength = this.blocks.length;
+  this.blocks[blockLength - 1].key = key;
+
+  return this;
+};
+
+RawContentState.prototype.addInlineStyle = function (styles) {
+  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var length = arguments[2];
+
+  var blockLength = this.blocks.length;
+  var block = this.blocks[blockLength - 1];
+
+  var newRanges = [].concat(styles).map(function (style) {
+    return {
+      offset: offset,
+      length: length >= 0 ? length : block.text.length,
+      style: style
+    };
+  });
+
+  block.inlineStyleRanges = block.inlineStyleRanges.concat(newRanges);
   return this;
 };
 
@@ -78,6 +105,25 @@ RawContentState.prototype.addEntity = function () {
   return this;
 };
 
+RawContentState.prototype.setData = function (data) {
+  var length = this.blocks.length;
+  if (length) {
+    this.blocks[length - 1].data = data;
+  }
+
+  return this;
+};
+
+RawContentState.prototype.setDepth = function (depth) {
+  var length = this.blocks.length;
+  if (length) {
+    this.blocks[length - 1].depth = depth;
+  }
+
+  return this;
+};
+
+// Selection
 RawContentState.prototype.anchorKey = function () {
   var offset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -102,6 +148,10 @@ RawContentState.prototype.focusKey = function () {
   return this;
 };
 
+RawContentState.prototype.setAnchorKey = RawContentState.prototype.anchorKey;
+
+RawContentState.prototype.setFocusKey = RawContentState.prototype.focusKey;
+
 RawContentState.prototype.collapse = function () {
   var offset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -118,45 +168,10 @@ RawContentState.prototype.collapse = function () {
   return this;
 };
 
-RawContentState.prototype.setData = function (data) {
-  var length = this.blocks.length;
-  if (length) {
-    this.blocks[length - 1].data = data;
-  }
-
-  return this;
-};
-
-RawContentState.prototype.setDepth = function (depth) {
-  var length = this.blocks.length;
-  if (length) {
-    this.blocks[length - 1].depth = depth;
-  }
-
-  return this;
-};
-
-// TODO: [] Test
-RawContentState.prototype.addInlineStyle = function (style) {
-  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-  var length = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-  var blockLength = this.raw.blocks.length;
-  var inlineRange = {
-    offset: offset,
-    length: length,
-    style: style
-  };
-  this.raw.blocks[blockLength - 1].inlineStyleRanges.push(inlineRange);
-
-  return this;
-};
-
-// TODO: [] Test
 RawContentState.prototype.isBackward = function () {
   var isBackward = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
-  var length = this.raw.blocks.length;
+  var length = this.blocks.length;
 
   if (length) {
     this.selection.isBackward = isBackward;
@@ -165,24 +180,12 @@ RawContentState.prototype.isBackward = function () {
   return this;
 };
 
-// TODO: [] Test
-RawContentState.prototype.setKey = function (key) {
-  var blockLength = this.raw.blocks.length;
-  this.raw.blocks[blockLength - 1].key = key;
-
-  return this;
-};
-
-// TODO: [] Test
+// Data conversion
 RawContentState.prototype.toRawContentState = function () {
-  return this.raw;
-};
-
-RawContentState.prototype.log = function () {
-  console.log(JSON.stringify(this.selection, null, 2));
-  console.log(JSON.stringify(this, null, 2));
-
-  return this;
+  return {
+    entityMap: this.entityMap,
+    blocks: this.blocks
+  };
 };
 
 RawContentState.prototype.toContentState = function () {
@@ -190,10 +193,17 @@ RawContentState.prototype.toContentState = function () {
 };
 
 RawContentState.prototype.toEditorState = function (decorator) {
-  var editorState = _draftJs.EditorState.createWithContent(this.toContentState({ entityMap: this.entityMap, blocks: this.blocks }), decorator);
+  var editorState = _draftJs.EditorState.createWithContent(this.toContentState(this.toRawContentState()), decorator);
   var selection = editorState.getSelection().merge(this.selection);
 
   return _draftJs.EditorState.acceptSelection(editorState, selection);
+};
+
+RawContentState.prototype.log = function () {
+  console.log(JSON.stringify(this.selection, null, 2));
+  console.log(JSON.stringify(this, null, 2));
+
+  return this;
 };
 
 exports.default = RawContentState;
