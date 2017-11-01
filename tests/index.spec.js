@@ -1,10 +1,25 @@
 import { expect } from 'chai';
 import { ContentState, EditorState } from 'draft-js';
-import Raw from '../build/index'
+import Raw from '../src/index';
 
 const h1 = 'header-one';
 const h2 = 'header-two';
 const span = 'unstyled';
+
+// inline styles
+const COLOR_RED = 'COLOR_RED';
+const COLOR_BLUE = 'COLOR_BLUE';
+
+// utils
+const findStyleRanges = (block, style) => {
+  let range = [];
+  block.findStyleRanges(
+    (char) => char.hasStyle(style),
+    (start, end) => range.push({ start, end })
+  );
+
+  return range;
+};
 
 describe('should create a contentState', () => {
   const contentState = new Raw();
@@ -123,7 +138,7 @@ describe('collapse', () => {
 describe('anchorKey and focusKey', () => {
   it('should change the anchor and focus Keys', () => {
     const contentState = new Raw()
-      .addBlock('block 1').anchorKey(2)
+      .addBlock('block 1').setAnchorKey(2)
       .addBlock('block 2')
       .addBlock('block 3').focusKey(7);
     const block1Key = contentState.blocks[0].key;
@@ -177,8 +192,8 @@ describe('addEntity', () => {
   it('should create default entity if with defined offset, and length', () => {
     const contentState = new Raw()
       .addBlock('block 1').addEntity({}, 2, 4)
-      .addBlock('block 3')
-      .log();
+      .addBlock('block 3');
+
     expect(contentState.entityMap).to.deep.equal({
       0: {
         type: 'DEFAULT_TYPE',
@@ -191,6 +206,148 @@ describe('addEntity', () => {
       length: 4,
       key: 0,
     }]);
+  });
+});
+
+describe('addInlineStyle', () => {
+  it('should add an inline style', () => {
+    const editorState = new Raw()
+      .addBlock('Block1 red')
+      .addInlineStyle(COLOR_RED, 7, 3)
+      .toEditorState();
+
+    const firstBlock = editorState
+      .getCurrentContent()
+      .getFirstBlock();
+
+    const ranges = findStyleRanges(firstBlock, COLOR_RED);
+    expect(ranges[0]).to.deep.equal({ start: 7, end: 10 })
+  });
+  it('should add an inline style to the whole block if no range is specified', () => {
+    const editorState = new Raw()
+      .addBlock('Block1 red')
+      .addInlineStyle(COLOR_RED)
+      .toEditorState();
+
+    const firstBlock = editorState
+      .getCurrentContent()
+      .getFirstBlock();
+
+    const ranges = findStyleRanges(firstBlock, COLOR_RED);
+    expect(ranges[0]).to.deep.equal({ start: 0, end: 10 })
+
+  });
+  it('should apply multiple inline styles', () => {
+    const editorState = new Raw()
+      .addBlock('Block1 red')
+      .addInlineStyle([COLOR_RED, COLOR_BLUE])
+      .toEditorState();
+
+    const firstBlock = editorState
+      .getCurrentContent()
+      .getFirstBlock();
+
+    const redRange = findStyleRanges(firstBlock, COLOR_RED);
+    expect(redRange[0]).to.deep.equal({ start: 0, end: 10 });
+
+    const blueRange = findStyleRanges(firstBlock, COLOR_BLUE);
+    expect(blueRange[0]).to.deep.equal({ start: 0, end: 10 })
+  });
+  it('should apply multiple inline styles with specified offset', () => {
+    const editorState = new Raw()
+      .addBlock('Block1 red')
+      .addInlineStyle([COLOR_RED, COLOR_BLUE], 7, 10)
+      .toEditorState();
+
+    const firstBlock = editorState
+      .getCurrentContent()
+      .getFirstBlock();
+
+    const redRange = findStyleRanges(firstBlock, COLOR_RED);
+    expect(redRange[0]).to.deep.equal({ start: 7, end: 10 });
+
+    const blueRange = findStyleRanges(firstBlock, COLOR_BLUE);
+    expect(blueRange[0]).to.deep.equal({ start: 7, end: 10 })
+  });
+});
+
+describe('isBackward', () => {
+  it('should return true when selection is backwards', () => {
+    const editorState = new Raw()
+      .addBlock('Block1')
+      .isBackward()
+      .toEditorState();
+
+    const isBackward = editorState
+      .getSelection()
+      .isBackward;
+
+    expect(isBackward).to.equal(true);
+  });
+});
+
+describe('setKey', () => {
+  it('should return true when selection is backwards', () => {
+    const key = '123';
+    const editorState = new Raw()
+      .addBlock('Block1')
+      .setKey(key)
+      .toEditorState();
+
+    const blockKey = editorState
+      .getCurrentContent()
+      .getFirstBlock()
+      .getKey(key);
+
+    expect(blockKey).to.equal(key)
+  });
+});
+
+describe('toRawContentState', () => {
+  it('should return a rawContentState', () => {
+    const newEntity = {
+      type: 'CUSTOM_COLOR',
+      mutability: 'MUTABLE',
+      data: { color: 'red' }
+    };
+
+    const rawContentState = new Raw()
+      .addBlock('Block1')
+      .setKey('123')
+      .addInlineStyle(COLOR_BLUE)
+      .addEntity(newEntity)
+      .toRawContentState();
+
+    expect(rawContentState).to.deep.equal({
+      entityMap: {
+        0: {
+          data: {
+            color: 'red',
+          },
+          mutability: 'MUTABLE',
+          type: 'CUSTOM_COLOR',
+        }
+      },
+      blocks: [{
+        key: '123',
+        text: 'Block1',
+        type: 'unstyled',
+        depth: 0,
+        inlineStyleRanges: [{
+          style: COLOR_BLUE,
+          offset: 0,
+          length: 6
+        }],
+        entityRanges: [
+          {
+            key: 0,
+            length: 6,
+            offset: 0,
+          }
+        ],
+        data: {},
+      }],
+    })
   });
 });
 
