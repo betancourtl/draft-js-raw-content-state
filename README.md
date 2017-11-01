@@ -26,13 +26,27 @@ const rawContentState = new Raw();
 - .addBlock(text, type, data) 
 Adds a new block.
 
+- setKey(key)
+Adds a blockKey
+
+- toRawContentState()
+Exports content as a rawContentState
+
+- isBackward()
+Sets isBackward SelectionState property to true
+
 - .addEntity(entity, offset, length)
 Creates a new entity.
 
+- .addInlineStyle(style, offset, length)
+Creates a new inline style.
+
 - .anchorKey(offset)
+- .setAnchorKey(offset)
 Sets the anchorKey, you can also provide an offset.
 
 - .focusKey(offset)
+- .setFocusKey(offset)
 Sets the focusKey, you can also provide an offset.
 
 - .collapse(offset)
@@ -52,6 +66,8 @@ Converts the raw contentState into an EditorState type object.
 
 ### Example
 
+To convert to a raw contentState 
+
 ```javascript
 const newEntity = {
   type: 'CUSTOM_COLOR',
@@ -60,12 +76,67 @@ const newEntity = {
 };
 
 const contentState = new Raw()
-  .addBlock('block 1').addEntity(newEntity, 2, 4)
-  .addBlock('block 3')
+  // first block
+  .addBlock('block 1')
+  setKey('edr45')
+  addEntity(newEntity, 2, 4) 
+  
+  // second block
+  .addBlock('block 2')
+  .addInlineStyle('COLOR_RED', 0, 6)
   .anchorKey(2)
   .focusKey(4)
-  .toEditorState(); // to convert to an EditorState 
+  .toEditorState(); 
 ```
+
+Generates
+```json
+ {
+  "entityMap": {
+    "0": {
+      "data": {
+        "color": "red"
+      },
+      "type": "CUSTOM_COLOR",
+      "mutability": "MUTABLE"
+    }
+  },
+  "blocks": [
+    {
+      "key": "edr45",
+      "text": "block 1",
+      "type": "unstyled",
+      "depth": 0,
+      "inlineStyleRanges": [],
+      "entityRanges": [
+        {
+          "key": 0,
+          "offset": 2,
+          "length": 4
+        }
+      ],
+      "data": {}
+    },
+    {
+      "key": "b6ar6",
+      "text": "block 2",
+      "type": "unstyled",
+      "depth": 0,
+      "inlineStyleRanges": [
+        {
+          "offset": 0,
+          "length": 6,
+          "style": "COLOR_RED"
+        }
+      ],
+      "entityRanges": [],
+      "data": {}
+    }
+  ]
+}
+```
+
+You an also generate EditorState and ContentStates typed objects.
 
 ## Support
 
