@@ -9,6 +9,10 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _draftJs = require('draft-js');
 
+var _blockTypes = require('./utils/blockTypes');
+
+var _createEntity = require('./utils/createEntity');
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 /**
@@ -30,7 +34,7 @@ var RawContentState = exports.RawContentState = function RawContentState(rawCont
 // Content Block
 RawContentState.prototype.addBlock = function () {
   var text = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-  var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'unstyled';
+  var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _blockTypes.unstyled;
   var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
   var block = {
@@ -50,6 +54,7 @@ RawContentState.prototype.addBlock = function () {
 
 RawContentState.prototype.setKey = function (key) {
   var blockLength = this.blocks.length;
+
   this.blocks[blockLength - 1].key = key;
 
   return this;
@@ -60,6 +65,7 @@ RawContentState.prototype.addInlineStyle = function (styles) {
   var length = arguments[2];
 
   var blockLength = this.blocks.length;
+
   var block = this.blocks[blockLength - 1];
 
   var newRanges = [].concat(styles).map(function (style) {
@@ -74,25 +80,24 @@ RawContentState.prototype.addInlineStyle = function (styles) {
   return this;
 };
 
-RawContentState.prototype.addEntity = function () {
-  var entityData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var entityOffset = arguments[1];
-  var entityLength = arguments[2];
-
-  var data = entityData.data || {};
-  var type = entityData.type || 'DEFAULT_TYPE';
-  var mutability = entityData.motability || 'MUTABLE';
+RawContentState.prototype.addEntity = function (entityData, entityOffset, entityLength) {
 
   if (entityOffset !== 0 && !entityOffset || !entityLength) {
     console.log('Entity will be applied to the whole block because\n       no entityOffset or entityLength where provided.');
   }
+
   var blockLength = this.blocks.length;
+
   var entityKey = Object.keys(this.entityMap).length;
 
-  // new entity to be added to the entityMap
-  var newEntity = _defineProperty({}, entityKey, { data: data, type: type, mutability: mutability });
+  var entity = (0, _createEntity.createEntity)({
+    data: entityData.data,
+    type: entityData.type,
+    mutability: entityData.mutability
+  });
 
-  // new entity to be added to the block
+  var newEntity = _defineProperty({}, entityKey, entity);
+
   var entityRange = {
     key: entityKey,
     offset: entityOffset || 0,
@@ -100,6 +105,7 @@ RawContentState.prototype.addEntity = function () {
   };
 
   this.entityMap = _extends({}, this.entityMap, newEntity);
+
   this.blocks[blockLength - 1].entityRanges.push(entityRange);
 
   return this;
@@ -107,6 +113,7 @@ RawContentState.prototype.addEntity = function () {
 
 RawContentState.prototype.setData = function (data) {
   var length = this.blocks.length;
+
   if (length) {
     this.blocks[length - 1].data = data;
   }
@@ -116,6 +123,7 @@ RawContentState.prototype.setData = function (data) {
 
 RawContentState.prototype.setDepth = function (depth) {
   var length = this.blocks.length;
+
   if (length) {
     this.blocks[length - 1].depth = depth;
   }
@@ -128,6 +136,7 @@ RawContentState.prototype.anchorKey = function () {
   var offset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
   var length = this.blocks.length;
+
   if (length) {
     this.selection.anchorKey = this.blocks[length - 1].key;
     this.selection.anchorOffset = offset;
@@ -156,6 +165,7 @@ RawContentState.prototype.collapse = function () {
   var offset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
   var length = this.blocks.length;
+
   if (length) {
     this.selection = {
       focusKey: this.blocks[length - 1].key,
@@ -194,6 +204,7 @@ RawContentState.prototype.toContentState = function () {
 
 RawContentState.prototype.toEditorState = function (decorator) {
   var editorState = _draftJs.EditorState.createWithContent(this.toContentState(this.toRawContentState()), decorator);
+
   var selection = editorState.getSelection().merge(this.selection);
 
   return _draftJs.EditorState.acceptSelection(editorState, selection);
