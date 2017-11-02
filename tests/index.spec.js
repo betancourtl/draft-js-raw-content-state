@@ -1,25 +1,18 @@
 import { expect } from 'chai';
 import { ContentState, EditorState } from 'draft-js';
+import {
+  createEntity,
+  findStyleRanges,
+  h1,
+  h2,
+  unstyled,
+  DEFAULT_TYPE,
+  SEGMENTED,
+  MUTABLE,
+  COLOR_RED,
+  COLOR_BLUE,
+} from '../src/utils';
 import Raw from '../src/index';
-
-const h1 = 'header-one';
-const h2 = 'header-two';
-const span = 'unstyled';
-
-// inline styles
-const COLOR_RED = 'COLOR_RED';
-const COLOR_BLUE = 'COLOR_BLUE';
-
-// utils
-const findStyleRanges = (block, style) => {
-  let range = [];
-  block.findStyleRanges(
-    (char) => char.hasStyle(style),
-    (start, end) => range.push({ start, end })
-  );
-
-  return range;
-};
 
 describe('should create a contentState', () => {
   const contentState = new Raw();
@@ -47,7 +40,7 @@ describe('addBlock', () => {
   });
   it('should add a block with block 1 text and unstyled type', () => {
     const contentState = new Raw().addBlock('block 1');
-    expect(contentState.blocks[0].type).to.equal(span);
+    expect(contentState.blocks[0].type).to.equal(unstyled);
   });
   it('should add a block with block 1 text and h2 type and data', () => {
     const data = { alignment: 'left' };
@@ -118,6 +111,54 @@ describe('toEditorState', () => {
   });
 });
 
+describe('toRawContentState', () => {
+  it('should return a rawContentState', () => {
+    const newEntity = {
+      type: 'CUSTOM_COLOR',
+      mutability: 'MUTABLE',
+      data: { color: 'red' }
+    };
+
+    const rawContentState = new Raw()
+      .addBlock('Block1')
+      .setKey('123')
+      .addInlineStyle(COLOR_BLUE)
+      .addEntity(newEntity)
+      .toRawContentState();
+
+    expect(rawContentState).to.deep.equal({
+      entityMap: {
+        0: {
+          data: {
+            color: 'red',
+          },
+          mutability: 'MUTABLE',
+          type: 'CUSTOM_COLOR',
+        }
+      },
+      blocks: [{
+        key: '123',
+        text: 'Block1',
+        type: 'unstyled',
+        depth: 0,
+        inlineStyleRanges: [{
+          style: COLOR_BLUE,
+          offset: 0,
+          length: 6
+        }],
+        entityRanges: [
+          {
+            key: 0,
+            length: 6,
+            offset: 0,
+          }
+        ],
+        data: {},
+      }],
+    })
+  });
+});
+
 describe('collapse', () => {
   it('should collapse the selection on specified block', () => {
     const contentState = new Raw()
@@ -153,12 +194,10 @@ describe('anchorKey and focusKey', () => {
 });
 
 describe('addEntity', () => {
-  it('should add an entity', () => {
-    const newEntity = {
-      type: 'CUSTOM_COLOR',
-      mutability: 'MUTABLE',
+  it('should add an entity to the whole block', () => {
+    const newEntity = createEntity({
       data: { color: 'red' }
-    };
+    });
 
     const contentState = new Raw()
       .addBlock('block 1').addEntity(newEntity)
@@ -178,8 +217,8 @@ describe('addEntity', () => {
       .addBlock('block 3');
     expect(contentState.entityMap).to.deep.equal({
       0: {
-        type: 'DEFAULT_TYPE',
-        mutability: 'MUTABLE',
+        type: DEFAULT_TYPE,
+        mutability: MUTABLE,
         data: {},
       }
     });
@@ -191,19 +230,39 @@ describe('addEntity', () => {
   });
   it('should create default entity if with defined offset, and length', () => {
     const contentState = new Raw()
-      .addBlock('block 1').addEntity({}, 2, 4)
+      .addBlock('block 1').addEntity(createEntity(), 2, 4)
       .addBlock('block 3');
 
     expect(contentState.entityMap).to.deep.equal({
       0: {
-        type: 'DEFAULT_TYPE',
-        mutability: 'MUTABLE',
+        type: DEFAULT_TYPE,
+        mutability: MUTABLE,
         data: {},
       }
     });
     expect(contentState.blocks[0].entityRanges).to.deep.equal([{
       offset: 2,
       length: 4,
+      key: 0,
+    }]);
+  });
+  it('should create an entity with specified mutability', () => {
+    const entity = createEntity({ mutability: SEGMENTED });
+    const rawContentState = new Raw()
+      .addBlock('Block 1', 'mention',)
+      .addEntity(entity)
+      .toRawContentState();
+
+    expect(rawContentState.entityMap).to.deep.equal({
+      0: {
+        type: DEFAULT_TYPE,
+        mutability: SEGMENTED,
+        data: {},
+      }
+    });
+    expect(rawContentState.blocks[0].entityRanges).to.deep.equal([{
+      offset: 0,
+      length: 7,
       key: 0,
     }]);
   });
@@ -302,54 +361,3 @@ describe('setKey', () => {
     expect(blockKey).to.equal(key)
   });
 });
-
-describe('toRawContentState', () => {
-  it('should return a rawContentState', () => {
-    const newEntity = {
-      type: 'CUSTOM_COLOR',
-      mutability: 'MUTABLE',
-      data: { color: 'red' }
-    };
-
-    const rawContentState = new Raw()
-      .addBlock('Block1')
-      .setKey('123')
-      .addInlineStyle(COLOR_BLUE)
-      .addEntity(newEntity)
-      .toRawContentState();
-
-    expect(rawContentState).to.deep.equal({
-      entityMap: {
-        0: {
-          data: {
-            color: 'red',
-          },
-          mutability: 'MUTABLE',
-          type: 'CUSTOM_COLOR',
-        }
-      },
-      blocks: [{
-        key: '123',
-        text: 'Block1',
-        type: 'unstyled',
-        depth: 0,
-        inlineStyleRanges: [{
-          style: COLOR_BLUE,
-          offset: 0,
-          length: 6
-        }],
-        entityRanges: [
-          {
-            key: 0,
-            length: 6,
-            offset: 0,
-          }
-        ],
-        data: {},
-      }],
-    })
-  });
-});
-
-
-
