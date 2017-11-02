@@ -1,4 +1,6 @@
 import { EditorState, genKey, convertFromRaw } from 'draft-js';
+import { unstyled } from './utils/blockTypes';
+import { createEntity } from "./utils/createEntity";
 
 /**
  * Helper library for manipulating raw contentStates, the intention is to
@@ -17,7 +19,7 @@ export const RawContentState = function (rawContentState) {
 };
 
 // Content Block
-RawContentState.prototype.addBlock = function (text = '', type = 'unstyled', data = {}) {
+RawContentState.prototype.addBlock = function (text = '', type = unstyled, data = {}) {
   const block = {
     key: genKey(),
     text,
@@ -35,6 +37,7 @@ RawContentState.prototype.addBlock = function (text = '', type = 'unstyled', dat
 
 RawContentState.prototype.setKey = function (key) {
   const blockLength = this.blocks.length;
+
   this.blocks[blockLength - 1].key = key;
 
   return this;
@@ -46,6 +49,7 @@ RawContentState.prototype.addInlineStyle = function (
   length
 ) {
   const blockLength = this.blocks.length;
+
   const block = this.blocks[blockLength - 1];
 
   const newRanges = []
@@ -62,13 +66,10 @@ RawContentState.prototype.addInlineStyle = function (
 };
 
 RawContentState.prototype.addEntity = function (
-  entityData = {},
+  entityData,
   entityOffset,
   entityLength
 ) {
-  const data = entityData.data || {};
-  const type = entityData.type || 'DEFAULT_TYPE';
-  const mutability = entityData.mutability || 'MUTABLE';
 
   if ((entityOffset !== 0 && !entityOffset) || !entityLength) {
     console.log(
@@ -76,13 +77,19 @@ RawContentState.prototype.addEntity = function (
        no entityOffset or entityLength where provided.`
     );
   }
+
   const blockLength = this.blocks.length;
+
   const entityKey = Object.keys(this.entityMap).length;
 
-  // new entity to be added to the entityMap
-  const newEntity = { [entityKey]: { data, type, mutability } };
+  const entity = createEntity({
+    data: entityData.data,
+    type: entityData.type,
+    mutability: entityData.mutability,
+  });
 
-  // new entity to be added to the block
+  const newEntity = { [entityKey]: entity };
+
   const entityRange = {
     key: entityKey,
     offset: entityOffset || 0,
@@ -90,6 +97,7 @@ RawContentState.prototype.addEntity = function (
   };
 
   this.entityMap = { ...this.entityMap, ...newEntity };
+
   this.blocks[blockLength - 1].entityRanges.push(entityRange);
 
   return this;
@@ -97,6 +105,7 @@ RawContentState.prototype.addEntity = function (
 
 RawContentState.prototype.setData = function (data) {
   const length = this.blocks.length;
+
   if (length) {
     this.blocks[length - 1].data = data;
   }
@@ -106,6 +115,7 @@ RawContentState.prototype.setData = function (data) {
 
 RawContentState.prototype.setDepth = function (depth) {
   const length = this.blocks.length;
+
   if (length) {
     this.blocks[length - 1].depth = depth;
   }
@@ -116,6 +126,7 @@ RawContentState.prototype.setDepth = function (depth) {
 // Selection
 RawContentState.prototype.anchorKey = function (offset = 0) {
   const length = this.blocks.length;
+
   if (length) {
     this.selection.anchorKey = this.blocks[length - 1].key;
     this.selection.anchorOffset = offset;
@@ -140,6 +151,7 @@ RawContentState.prototype.setFocusKey = RawContentState.prototype.focusKey;
 
 RawContentState.prototype.collapse = function (offset = 0) {
   const length = this.blocks.length;
+
   if (length) {
     this.selection = {
       focusKey: this.blocks[length - 1].key,
@@ -179,6 +191,7 @@ RawContentState.prototype.toEditorState = function (decorator) {
     this.toContentState(this.toRawContentState()),
     decorator
   );
+
   const selection = editorState.getSelection().merge(this.selection);
 
   return EditorState.acceptSelection(editorState, selection);
