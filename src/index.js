@@ -68,7 +68,7 @@ RawContentState.prototype.addEntity = function (
 ) {
   const data = entityData.data || {};
   const type = entityData.type || 'DEFAULT_TYPE';
-  const mutability = entityData.motability || 'MUTABLE';
+  const mutability = entityData.mutability || 'MUTABLE';
 
   if ((entityOffset !== 0 && !entityOffset) || !entityLength) {
     console.log(
