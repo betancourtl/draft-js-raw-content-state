@@ -246,6 +246,26 @@ describe('addEntity', () => {
       key: 0,
     }]);
   });
+  it('should create an entity with MUTABLE mutability if invalid mutability is passed', () => {
+    const entity = createEntity({ mutability: 'INVALID_MUTABILITY' });
+    const rawContentState = new Raw()
+      .addBlock('Block 1', 'mention',)
+      .addEntity(entity)
+      .toRawContentState();
+
+    expect(rawContentState.entityMap).to.deep.equal({
+      0: {
+        type: DEFAULT_TYPE,
+        mutability: MUTABLE,
+        data: {},
+      }
+    });
+    expect(rawContentState.blocks[0].entityRanges).to.deep.equal([{
+      offset: 0,
+      length: 7,
+      key: 0,
+    }]);
+  });
   it('should create an entity with specified mutability', () => {
     const entity = createEntity({ mutability: SEGMENTED });
     const rawContentState = new Raw()
@@ -258,6 +278,48 @@ describe('addEntity', () => {
         type: DEFAULT_TYPE,
         mutability: SEGMENTED,
         data: {},
+      }
+    });
+    expect(rawContentState.blocks[0].entityRanges).to.deep.equal([{
+      offset: 0,
+      length: 7,
+      key: 0,
+    }]);
+  });
+  it('should create an entity with specified type', () => {
+    const MY_TYPE = 'MY_TYPE';
+    const entity = createEntity({ type: MY_TYPE });
+    const rawContentState = new Raw()
+      .addBlock('Block 1', 'mention',)
+      .addEntity(entity)
+      .toRawContentState();
+
+    expect(rawContentState.entityMap).to.deep.equal({
+      0: {
+        type: MY_TYPE,
+        mutability: MUTABLE,
+        data: {},
+      }
+    });
+    expect(rawContentState.blocks[0].entityRanges).to.deep.equal([{
+      offset: 0,
+      length: 7,
+      key: 0,
+    }]);
+  });
+  it('should create an entity with specified data', () => {
+    const data = { name: 'sbiyyala' };
+    const entity = createEntity({ data });
+    const rawContentState = new Raw()
+      .addBlock('Block 1', 'mention',)
+      .addEntity(entity)
+      .toRawContentState();
+
+    expect(rawContentState.entityMap).to.deep.equal({
+      0: {
+        type: DEFAULT_TYPE,
+        mutability: MUTABLE,
+        data: data,
       }
     });
     expect(rawContentState.blocks[0].entityRanges).to.deep.equal([{
