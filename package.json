@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/webdeveloperpr/draft-js-raw-content-state#readme",
   "dependencies": {
-    "draft-js": "0.10.1"
+    "draft-js": "0.10.4"
   },
   "devDependencies": {
     "babel-cli": "6.24.1",
@@ -45,9 +45,9 @@
     "babel-preset-stage-0": "6.24.1",
     "chai": "3.5.0",
     "mocha": "3.4.1",
-    "np": "2.15.0",
-    "react": "15.5.4",
-    "react-dom": "15.5.4",
+    "np": "2.16.1",
+    "react": "16.0.0",
+    "react-dom": "16.0.0",
     "watch": "1.0.2"
   }
 }
