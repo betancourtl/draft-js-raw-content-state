@@ -37,17 +37,19 @@ RawContentState.prototype.addBlock = function () {
   var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _blockTypes.unstyled;
   var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-  var block = {
-    key: (0, _draftJs.genKey)(),
-    text: text,
-    type: type,
-    depth: 0,
-    inlineStyleRanges: [],
-    entityRanges: [],
-    data: data
+  var block = function block() {
+    return {
+      key: (0, _draftJs.genKey)(),
+      text: text,
+      type: type,
+      depth: 0,
+      inlineStyleRanges: [],
+      entityRanges: [],
+      data: data
+    };
   };
 
-  this.blocks.push(block);
+  this.blocks.push(block());
 
   return this;
 };

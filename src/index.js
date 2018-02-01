@@ -20,7 +20,7 @@ export const RawContentState = function (rawContentState) {
 
 // Content Block
 RawContentState.prototype.addBlock = function (text = '', type = unstyled, data = {}) {
-  const block = {
+  const block = () =>({
     key: genKey(),
     text,
     type,
@@ -28,9 +28,9 @@ RawContentState.prototype.addBlock = function (text = '', type = unstyled, data 
     inlineStyleRanges: [],
     entityRanges: [],
     data,
-  };
+  });
 
-  this.blocks.push(block);
+  this.blocks.push(block());
 
   return this;
 };
