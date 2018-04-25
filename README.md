@@ -23,16 +23,16 @@ const rawContentState = new Raw();
 
 ### API
 
-- .addBlock(text, type, data) 
+- .addBlock(text, type, data)
 Adds a new block.
 
-- setKey(key)
+- .setKey(key)
 Adds a blockKey
 
-- toRawContentState()
+- .toRawContentState()
 Exports content as a rawContentState
 
-- isBackward()
+- .isBackward()
 Sets isBackward SelectionState property to true
 
 - .addEntity(entity, offset, length)
@@ -53,7 +53,7 @@ Sets the focusKey, you can also provide an offset.
 Sets focus and anchorKey, you may provide an offset.
 
 - .setData(data)
-Sets the data on the block. 
+Sets the data on the block.
 
 - .log()
 console.logs the rawContentState.
@@ -66,7 +66,7 @@ Converts the raw contentState into an EditorState type object.
 
 ### Example
 
-To convert to a raw contentState 
+To convert to a raw contentState
 
 ```javascript
 const newEntity = {
@@ -78,15 +78,15 @@ const newEntity = {
 const contentState = new Raw()
   // first block
   .addBlock('block 1')
-  setKey('edr45')
-  addEntity(newEntity, 2, 4) 
-  
+  .setKey('edr45')
+  .addEntity(newEntity, 2, 4)
+
   // second block
   .addBlock('block 2')
   .addInlineStyle('COLOR_RED', 0, 6)
   .anchorKey(2)
   .focusKey(4)
-  .toEditorState(); 
+  .toEditorState();
 ```
 
 Generates
